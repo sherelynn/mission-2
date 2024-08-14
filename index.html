@@ -11,7 +11,46 @@
       rel="stylesheet" />
     <title>Tic Tac Toe</title>
   </head>
+
   <body>
+    <header>
+      <h1 id="title">Tic Tac Toe</h1>
+      <h2 id="subtitle">Click on a cell to start!</h2>
+    </header>
+
+    <main>
+      <!-- Table cells for the game -->
+      <table id="board">
+        <tbody>
+          <tr>
+            <td id="cell-0-0"></td>
+            <td id="cell-0-1"></td>
+            <td id="cell-0-2"></td>
+          </tr>
+          <tr>
+            <td id="cell-1-0"></td>
+            <td id="cell-1-1"></td>
+            <td id="cell-1-2"></td>
+          </tr>
+          <tr>
+            <td id="cell-2-0"></td>
+            <td id="cell-2-1"></td>
+            <td id="cell-2-2"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Result Section -->
+      <div id="result">
+        <h2 id="xcount">X wins:</h2>
+        <h2 id="ocount">O winds:</h2>
+      </div>
+
+      <!-- Reset Button -->
+      <button id="reset-btn">Reset Game</button>
+    </main>
+
+    <!-- Script -->
     <script src="script.js"></script>
   </body>
 </html>
