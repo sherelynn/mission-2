@@ -10,26 +10,7 @@ body {
   text-align: center;
 }
 
-header,
-main {
-  margin: 3%;
-}
-
-#title {
-  font-size: 3em;
-}
-
-h2,
-#result > span,
-button {
-  font-size: 2em;
-}
-
-#title,
-#result > span {
-  color: olive;
-}
-
+/* Table Section */
 table,
 td {
   border: 2px solid wheat;
@@ -42,28 +23,56 @@ table {
 }
 
 td {
-  width: 12vw;
-  height: 12vh;
-  font-size: 6em;
+  width: 8vw;
+  height: 8vh;
 }
 
+/* Result Section */
 #result {
-  margin-top: 5em;
   width: 100%;
   display: grid;
   grid-template: 1fr 1fr / 1fr 1fr;
 }
 
+/* Button Section */
 button {
   background-color: rgb(225, 151, 14);
   color: rgb(49, 27, 27);
   border: none;
   border-radius: 10px;
-  padding: 1.5%;
-  margin: 0 1em;
+  padding: 2%;
 }
 
+/* Cursor: Pointer */
 td,
 button {
   cursor: pointer;
+}
+
+/* Margin */
+main,
+#result {
+  margin-top: 4em;
+}
+
+/* Font Color */
+#title,
+#result > span {
+  color: olive;
+}
+
+/* Font Size */
+#title,
+td {
+  font-size: 1.5em;
+}
+
+button {
+  font-size: 1em;
+  margin-bottom: 1em;
+}
+
+h2,
+span {
+  font-size: 1.2em;
 }
