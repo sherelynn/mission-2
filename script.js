@@ -160,7 +160,7 @@ const resetScore = () => {
   document.getElementById("x-count").textContent = ""
   document.getElementById("o-count").textContent = ""
   document.getElementById("subtitle").textContent =
-    "Click on a cell to start! -> ⭕️ Nought's First!"
+    "Click on a cell to start! -> ⭕️ First!"
 
   // Call "resetGameLayout" function
   resetGameLayout()
