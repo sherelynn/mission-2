@@ -15,42 +15,52 @@ main {
   margin: 3%;
 }
 
+#title {
+  font-size: 3em;
+}
+
+h2,
+#result > span,
+button {
+  font-size: 2em;
+}
+
+#title,
+#result > span {
+  color: olive;
+}
+
 table,
 td {
   border: 2px solid wheat;
 }
 
 table {
-  max-width: 60vw;
+  width: 100%;
   border-collapse: collapse;
   box-shadow: -0.1em -0.1em 3em 2em olive;
 }
 
 td {
-  width: 8vw;
-  height: 8vh;
-  font-size: 4em;
+  width: 12vw;
+  height: 12vh;
+  font-size: 6em;
 }
 
 #result {
   margin-top: 5em;
-}
-
-span,
-button {
-  font-size: 1.5em;
-}
-
-span {
-  color: olive;
+  width: 100%;
+  display: grid;
+  grid-template: 1fr 1fr / 1fr 1fr;
 }
 
 button {
-  background-color: #e6ae47;
-  color: black;
+  background-color: rgb(225, 151, 14);
+  color: rgb(49, 27, 27);
   border: none;
   border-radius: 10px;
-  padding: 2%;
+  padding: 1.5%;
+  margin: 0 1em;
 }
 
 td,
