@@ -81,6 +81,11 @@ span {
     font-size: 2em;
   }
 
+  h2,
+  span {
+    font-size: 1.5em;
+  }
+
   td {
     width: 12vw;
     height: 10vh;
