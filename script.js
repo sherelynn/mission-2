@@ -1,17 +1,30 @@
-// Array of all the cells in the table
-const cells = document.getElementsByTagName("td")
+// ===== Variables for the elements ===== //
+const cells = document.getElementsByTagName("td") // Array of all the cells in the table
+const subtitle = document.getElementById("subtitle") // Dynamic subtitle
+const oCountWins = document.getElementById("o-count") // Displays "O" wins
+const xCountWins = document.getElementById("x-count") // Displays "X" wins
+const resetGameBtn = document.getElementById("reset-game-btn") // Reset game button
+const resetScoreBtn = document.getElementById("reset-score-btn") // Reset score button
+
+// SoundPaths
+const clickSoundPath = "./sounds/click-sound.mp3"
+const staleMateSoundPath = "./sounds/stalemate-sound.mp3"
+const gameOverSoundPath = "./sounds/game-over-sound.mp3"
+const resetGameSoundPath = "./sounds/reset-game-sound.mp3"
+const resetScoreSoundPath = "./sounds/reset-score-sound.mp3"
 
 // Variables to keep track of the game state
-// Nought starts first
-// Game is over once winning condition is met
-// "clicks" keeps track of the number of clicks
-// "xCount" and "oCount" keep track of the number of wins
+let noughtsTurn = true // Nought starts first
+let gameIsOver // Game is over once winning condition is met
+let clicks = 0 // Clicks counter
+let oCount = 0 // "O" wins counter
+let xCount = 0 // "X" wins counter
 
-let noughtsTurn = true
-let gameIsOver
-let clicks = 0
-let oCount = 0
-let xCount = 0
+// Function to play sound
+const playSound = soundPath => {
+  const sound = new Audio(soundPath)
+  sound.play()
+}
 
 // Function to switch player
 const switchPlayer = () => {
@@ -19,11 +32,9 @@ const switchPlayer = () => {
   noughtsTurn = !noughtsTurn
 
   // Display player's turn
-  noughtsTurn
-    ? (document.getElementById(
-        "subtitle"
-      ).textContent = `It's ⭕️ Nought's Turn`)
-    : (document.getElementById("subtitle").textContent = `It's ❌ Cross's Turn`)
+  subtitle.textContent = noughtsTurn
+    ? `It's ⭕️ Nought's Turn`
+    : `It's ❌ Cross's Turn`
 }
 
 // Function to handle the click cell event
@@ -32,8 +43,7 @@ const handleClickCell = event => {
   const cell = event.target
 
   // Play sound when cell is clicked
-  const sound = new Audio("./sounds/click-sound.mp3")
-  sound.play()
+  playSound(clickSoundPath)
 
   // Condition: Empty cell
   // Mark cell "X" or "O"
@@ -42,6 +52,7 @@ const handleClickCell = event => {
     // Variable for "X" or "O"
     let symbol = noughtsTurn ? "O" : "X"
     cell.textContent = symbol
+    cell.style.color = symbol === "O" ? "darkOrange" : "khaki"
     clicks++
 
     // Call the function to check for winning condition
@@ -54,11 +65,10 @@ const handleClickCell = event => {
 
       // Condition: All cells are filled && winning condition not met
       if (clicks === 9) {
-        document.getElementById("subtitle").textContent = "S T A L E M A T E !"
+        subtitle.textContent = "❗️ S T A L E M A T E ❗️"
 
         // Play sound if it's a stalemate
-        const sound = new Audio("./sounds/stalemate-sound.mp3")
-        sound.play()
+        playSound(staleMateSoundPath)
       }
     }
   }
@@ -98,23 +108,17 @@ const checkWinningCondition = symbol => {
         gameIsOver = true
 
         // Play sound when game is over
-        const sound = new Audio("./sounds/game-over-sound.mp3")
-        sound.play()
+        playSound(gameOverSoundPath)
 
         // Display the winning message
-        const subtitle = (document.getElementById(
-          "subtitle"
-        ).textContent = `Player 🔥 ${symbol} 🔥 Wins! `)
+        subtitle.textContent =
+          symbol === "X" ? `Cross 🍁❌🍁 Wins!` : `Nought 🍁⭕️🍁 Wins!`
 
         // Increment "xCount" && "oCount" counter
         // Display number of wins
-        if (symbol === "O") {
-          oCount++
-          document.getElementById("o-count").textContent = oCount
-        } else {
-          xCount++
-          document.getElementById("x-count").textContent = xCount
-        }
+        symbol === "O"
+          ? (oCount++, (oCountWins.textContent = oCount))
+          : (xCount++, (xCountWins.textContent = xCount))
 
         // Disable "handleClickCell" event when game is over
         for (const cell of cells) {
@@ -128,7 +132,7 @@ const checkWinningCondition = symbol => {
 // Function to reset the game layout to be used for handling reset buttons
 const resetGameLayout = () => {
   for (const cell of cells) {
-    // Reset the cell's text content to empty string
+    // Reset the cells to empty string
     cell.textContent = ""
     // Reset the game state and clicks counter
     gameIsOver = false
@@ -140,30 +144,35 @@ const resetGameLayout = () => {
 
 // Function to handle the reset game click event
 // Scores remain
-const resetGame = () => {
+const handleResetGame = () => {
   // Winner starts second on the next game
   // Restarting switches to other player
   switchPlayer()
 
   // Call "resetGameLayout" function
   resetGameLayout()
+
+  // Play sound when resetting the game
+  playSound(resetGameSoundPath)
 }
 
 // Function to handle the reset score click event
-const resetScore = () => {
+const handleResetScore = () => {
   // Nought always starts first
   noughtsTurn = true
 
   // Reset the counter for number of wins
   xCount = 0
   oCount = 0
-  document.getElementById("x-count").textContent = ""
-  document.getElementById("o-count").textContent = ""
-  document.getElementById("subtitle").textContent =
-    "Click on a cell to start! -> ⭕️ First!"
+  xCountWins.textContent = ""
+  oCountWins.textContent = ""
+  subtitle.textContent = "Click on a cell to start! -> ⭕️ First!"
 
   // Call "resetGameLayout" function
   resetGameLayout()
+
+  // Play sound when resetting score
+  playSound(resetScoreSoundPath)
 }
 
 // === Binding Event Handlers === //
@@ -174,7 +183,7 @@ for (const cell of cells) {
 }
 
 // Event listener to bind "resetGame" event handler function to the "reset-game-btn"
-document.getElementById("reset-game-btn").addEventListener("click", resetGame)
+resetGameBtn.addEventListener("click", handleResetGame)
 
-// Event listener to bind "resetScore" event handler function to the "reset-score-btn"
-document.getElementById("reset-score-btn").addEventListener("click", resetScore)
+// Event listener to bind "handleResetScore" event handler function to the "reset-score-btn"
+resetScoreBtn.addEventListener("click", handleResetScore)
