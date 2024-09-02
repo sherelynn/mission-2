@@ -25,6 +25,8 @@ table {
 td {
   width: 8vw;
   height: 8vh;
+  font-weight: 900;
+  padding: 0;
 }
 
 /* Result Section */
@@ -66,7 +68,7 @@ main,
 /* Common Font Size */
 #title,
 td {
-  font-size: 1.5em;
+  font-size: 2em;
 }
 
 h2,
@@ -89,7 +91,7 @@ span {
   td {
     width: 12vw;
     height: 10vh;
-    font-size: 3em;
+    font-size: 3.5em;
   }
 
   button {
@@ -111,7 +113,7 @@ span {
   td {
     width: 10vw;
     height: 12vh;
-    font-size: 6em;
+    font-size: 5em;
   }
 
   button {
