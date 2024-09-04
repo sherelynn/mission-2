@@ -1,46 +1,51 @@
-// ===== Variables for the elements ===== //
-const cells = Array.from(document.getElementsByTagName("td")) // Array of all the cells in the table
+// ========== HTML Element References ========== //
+const cells = Array.from(document.getElementsByTagName("td")) // Array of all table cells
 const subtitle = document.getElementById("subtitle") // Dynamic subtitle
 const oCountWins = document.getElementById("o-count") // Displays "O" wins
 const xCountWins = document.getElementById("x-count") // Displays "X" wins
 const resetGameBtn = document.getElementById("reset-game-btn") // Reset game button
 const resetScoreBtn = document.getElementById("reset-score-btn") // Reset score button
 
-// SoundPaths
-const clickSoundPath = "./sounds/click-sound.mp3"
-const staleMateSoundPath = "./sounds/stalemate-sound.mp3"
-const gameOverSoundPath = "./sounds/game-over-sound.mp3"
-const resetGameSoundPath = "./sounds/reset-game-sound.mp3"
-const resetScoreSoundPath = "./sounds/reset-score-sound.mp3"
+// ========== Sound File Paths ========== //
+const soundPaths = {
+  click: "./sounds/click-sound.mp3",
+  stalemate: "./sounds/stalemate-sound.mp3",
+  gameOver: "./sounds/game-over-sound.mp3",
+  resetGame: "./sounds/reset-game-sound.mp3",
+  resetScore: "./sounds/reset-score-sound.mp3",
+}
 
-// Variables to keep track of the game state
+// ========== Game State Variables ========== //
+
 let noughtsTurn = true // Nought starts first
-let gameIsOver // Game is over once winning condition is met
-let clicks = 0 // Clicks counter
-let oCount = 0 // "O" wins counter
-let xCount = 0 // "X" wins counter
+let gameIsOver // Indicates if winning condition is met
+let clicks = 0 // Counter for number of clicks
+let oCount = 0 // Counter for nought's wins
+let xCount = 0 // Counter for cross's wins
 
 // Array of winning combinations
 const winningCombinations = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
+  [0, 1, 2], // Top row
+  [3, 4, 5], // Middle row
+  [6, 7, 8], // Bottom row
+  [0, 3, 6], // Left column
+  [1, 4, 7], // Middle column
+  [2, 5, 8], // Right column
+  [0, 4, 8], // Diagonal from top left to bottom right
+  [2, 4, 6], // Diagonal from top right to bottom left
 ]
 
-// Function to play sound
-const playSound = soundPath => {
-  const sound = new Audio(soundPath)
+// ========== Utility Functions ========== //
+
+// ===== Play Sound ===== //
+const playSound = soundType => {
+  const sound = new Audio(soundPaths[soundType])
   sound.play()
 }
 
-// Function to switch player
-const switchPlayer = () => {
-  // Toggle the value of "noughtsTurn"
+// ===== Toggle Player ===== //
+const togglePlayer = () => {
+  // Toggle value of "noughtsTurn"
   noughtsTurn = !noughtsTurn
 
   // Display player's turn
@@ -48,231 +53,234 @@ const switchPlayer = () => {
     ? `It's ⭕️ Nought's Turn`
     : `It's ❌ Cross's Turn`
 
-  console.log("noughtsTurn", noughtsTurn)
-  return noughtsTurn // To be used for computer's move
+  return noughtsTurn
 }
 
-// Function to get available cells
-const getAvailableCells = () => cells.filter(cell => cell.textContent === "")
+// ========== Game Logic Functions ========== //
 
-// Function to make a move
-const makeMove = (index, symbol) => {
+// ===== Update Game State if Winning ===== //
+const setWinningGameState = symbol => {
+  gameIsOver = true
+
+  // Play sound when game is over
+  playSound("gameOver")
+
+  // Display winning message
+  subtitle.textContent =
+    symbol === "X" ? `Cross -❌- Wins!` : `Nought -⭕️- Wins!`
+
+  // Increment "xCount" && "oCount" counters
+  // Display number of wins
+  symbol === "O"
+    ? (oCount++, (oCountWins.textContent = oCount))
+    : (xCount++, (xCountWins.textContent = xCount))
+
+  // Call function to disable cell clicks
+  clickCells("removeEventListener")
+}
+
+// ===== Update Game State if Stalemate ===== //
+const setStalemateGameState = () => {
+  // Display stalemate message
+  subtitle.textContent = "❗️ S T A L E M A T E ❗️"
+  playSound("stalemate")
+}
+
+// ===== Check for Winning Condition ===== //
+const checkWinningCondition = symbol => {
+  // Loop through each winning combination
+  for (let combination of winningCombinations) {
+    // Check if each cell in combination has same symbol
+    const winningCombination = combination.every(
+      cell => cells[cell].textContent === symbol
+    )
+
+    if (winningCombination) {
+      // Call function to update the game state
+      setWinningGameState(symbol)
+    }
+  }
+}
+
+// ===== Display Player's Move ===== //
+const displayMove = (index, symbol) => {
   cells[index].textContent = symbol
   cells[index].style.color = symbol === "O" ? "darkOrange" : "khaki"
 }
 
-// Function to check move
-const checkMove = (move, symbol, noughtsTurn) => {
-  console.log("check-move", move, symbol, noughtsTurn)
-  makeMove(move, symbol)
+// ===== Check Player's Move ===== //
+const checkMove = (index, symbol) => {
+  // Call function to display player's move
+  displayMove(index, symbol)
+
+  // Increment the clicks counter
   clicks++
-  console.log("clicks", clicks)
+
+  // Call function to check for winning condition
   checkWinningCondition(symbol)
+
+  // Condition: No player is winning yet
   if (!gameIsOver) {
     // Switch to next player
-    const userPlayer = switchPlayer()
-    console.log("userPlayer", noughtsTurn)
-    if (!userPlayer) {
-      setTimeout(computerMove, 500)
+    const noughtsTurn = togglePlayer()
+    // Computer's turn
+    if (!noughtsTurn) {
+      setTimeout(makeComputerMove, 500)
     }
-  }
-
-  if (clicks === 9) {
-    // Condition: All cells are filled && winning condition not met
-    subtitle.textContent = "❗️ S T A L E M A T E ❗️"
-
-    // Play sound if it's a stalemate
-    playSound(staleMateSoundPath)
-  }
-}
-
-// Function to check for winning condition
-const checkWinningCondition = symbol => {
-  // Loop through each winning combination
-  for (let combination of winningCombinations) {
-    // Variable to keep track of the count of the symbol in the combination
-    let symbolCount = 0
-
-    // Loop through each cell in the combination
-    for (let cell of combination) {
-      // Condition: Cell not empty and contains same symbol as the current player
-      // Increment "symbolCount"
-      if (cells[cell].textContent === symbol) {
-        symbolCount++
-      }
-
-      // Condition: All cells in the combination have the same symbol
-      // gameIsOver -> Winning condition is met
-      if (symbolCount === 3) {
-        // Update the game state
-        gameIsOver = true
-
-        // Play sound when game is over
-        playSound(gameOverSoundPath)
-
-        // Display the winning message
-        subtitle.textContent =
-          symbol === "X" ? `Cross -❌- Wins!` : `Nought -⭕️- Wins!`
-
-        // Increment "xCount" && "oCount" counter
-        // Display number of wins
-        symbol === "O"
-          ? (oCount++, (oCountWins.textContent = oCount))
-          : (xCount++, (xCountWins.textContent = xCount))
-
-        // Disable "handleClickCell" event when game is over
-        for (const cell of cells) {
-          cell.removeEventListener("click", handleClickCell)
-        }
-      }
+    // Condition: All cells are filled and winning condition not met
+    if (clicks === 9) {
+      // Call function to update the game state
+      setStalemateGameState()
     }
   }
 }
 
-// Function to find a winning move or block move for the computer
+// ===== Find Best Move for Computer ===== //
 const findBestMove = () => {
   const computerSymbol = "X"
   const opponentSymbol = "O"
 
   // Iterate through each winning combination
   for (let combination of winningCombinations) {
-    // Retrieve the values of the cells in the combination
-    console.log("combination", combination)
+    // Get values of cells in the combination
+    const combinationValues = combination.map(index => cells[index].textContent)
 
-    const combinationValues = combination.map(index => {
-      const value = cells[index].textContent
-      console.log(`Index: ${index}, Value: ${value}`) // Debugging output
-      return value
-    })
-
-    console.log(`Combination: ${combination}, Values: ${combinationValues}`)
-
-    // Find the index of the empty cell in the combination
-    const emptyIndex = combination.find(
+    // Find empty cell in the combination
+    const emptyCellIndex = combination.find(
       index => cells[index].textContent === ""
     )
 
-    // Condition: Only proceed if there is an empty cell
-    if (emptyIndex !== undefined) {
+    // Check if empty cell is a winning move or a blocking move
+    if (emptyCellIndex !== undefined) {
       const isWinningMove =
         combinationValues.filter(value => value === computerSymbol).length === 2
       const isBlockingMove =
         combinationValues.filter(value => value === opponentSymbol).length === 2
 
       if (isWinningMove || isBlockingMove) {
-        console.log("winning/blocking move", emptyIndex)
-        return emptyIndex
+        return emptyCellIndex
       }
     }
   }
 
-  return null
+  return null // No best move found
 }
 
-// Function for the computer's move
-const computerMove = () => {
-  noughtsTurn = false
-  // Find the best move for the computer
-  let move = findBestMove("X")
-  console.log("best move", move)
+// ===== Computer's Move ===== //
+const makeComputerMove = () => {
+  // Variable for computer's symbol
+  const symbol = "X"
 
-  // Make the best move or a random move
-  if (move !== null) {
-    checkMove(move, "X", noughtsTurn)
+  // Call function to find best move
+  let bestMoveIndex = findBestMove()
+
+  if (bestMoveIndex !== null) {
+    // Best move found
+    checkMove(bestMoveIndex, symbol)
   } else {
-    // No best move found, make a random move
-
-    const availableCells = getAvailableCells()
+    // Best move not found
+    // Make a random move
+    const availableCells = cells.filter(cell => cell.textContent === "")
     if (availableCells.length > 0) {
-      move = Number(
+      randomMoveIndex = Number(
         availableCells[
           Math.floor(Math.random() * availableCells.length)
         ].getAttribute("data-index")
       )
-      console.log("random move", move)
-      checkMove(move, "X", noughtsTurn)
+      // Check computer's move
+      checkMove(randomMoveIndex, symbol)
     }
   }
 }
 
-// Function to handle the click cell event
+// ===== Handle Cell Click ===== //
 const handleClickCell = event => {
-  // Variable to store the cell that was clicked
+  // Variable to store clicked
   const cell = event.target
 
-  // Play sound when cell is clicked
-  playSound(clickSoundPath)
+  // Play sound if clicked
+  playSound("click")
 
   // Condition: Empty cell
-  // Mark cell "X" or "O"
-  // Increment "clicks"
   if (cell.textContent === "") {
-    noughtsTurn = true
+    // Variable for user's symbol
     let symbol = "O"
     let index = Number(cell.getAttribute("data-index"))
-    console.log("user-cell-index", index)
     cell.textContent = symbol
 
-    // Check user player's move
-    checkMove(index, symbol, noughtsTurn)
+    // Check user's move
+    checkMove(index, symbol)
   }
 }
 
-// Function to reset the game layout to be used for handling reset buttons
-const resetGameLayout = () => {
-  for (const cell of cells) {
-    // Reset the cells to empty string
-    cell.textContent = ""
-    // Reset the game state and clicks counter
-    gameIsOver = false
-    clicks = 0
-    // Activate "handleClickCell" event again
-    cell.addEventListener("click", handleClickCell)
-  }
+// ========== Reset Utility Functions ========== //
+
+// ===== Reset Content for Each Cells ===== //
+const resetCellsContent = () => cells.forEach(cell => (cell.textContent = ""))
+
+// ===== Reset Game Condition ===== //
+const resetGameCondition = () => {
+  gameIsOver = false
+  clicks = 0
 }
 
-// Function to handle the reset game click event
-// Scores remain
-const handleResetGame = () => {
-  // Noughts starts first
+// ===== Reset Player to Nought ===== //
+const resetPlayerToNought = () => {
+  // Nought starts first
   noughtsTurn = false
-  switchPlayer()
-
-  // Call "resetGameLayout" function
-  resetGameLayout()
-
-  // Play sound when resetting the game
-  playSound(resetGameSoundPath)
+  togglePlayer()
 }
 
-// Function to handle the reset score click event
-const handleResetScore = () => {
-  // Nought always starts first
-  noughtsTurn = true
-
-  // Reset the counter for number of wins
-  xCount = 0
+// ===== Reset Wins Counters ===== //
+const resetCounters = () => {
   oCount = 0
-  xCountWins.textContent = ""
+  xCount = 0
   oCountWins.textContent = ""
-  subtitle.textContent = "Click on a cell to start! -> ⭕️ First!"
-
-  // Call "resetGameLayout" function
-  resetGameLayout()
-
-  // Play sound when resetting score
-  playSound(resetScoreSoundPath)
+  xCountWins.textContent = ""
 }
 
-// === Binding Event Handlers === //
+// ===== Reset Subtitle ===== //
+const resetSubtitle = () =>
+  (subtitle.textContent = `Click on a cell to start! -> ⭕️ First!"`)
 
-// Event listener to bind "handleClickCell" event handler function to each cell
-for (const cell of cells) {
-  cell.addEventListener("click", handleClickCell)
+// ========== Handle Reset Buttons ========== //
+const handleResetButtons = event => {
+  const button = event.target.id
+
+  // Reset player to nought
+  resetPlayerToNought()
+
+  // Reset cell content
+  resetCellsContent()
+
+  // Reset game condition and clicks counter
+  resetGameCondition()
+
+  // Activate "handleClickCell" event again
+  clickCells("activate")
+
+  if (button === "reset-score-btn") {
+    // Reset counters for number of wins
+    resetCounters()
+
+    // Reset subtitle
+    resetSubtitle()
+
+    // Play sound when resetting score
+    playSound("resetScore")
+  } else {
+    // Play sound when resetting the game
+    playSound("resetGame")
+  }
 }
 
-// Event listener to bind "resetGame" event handler function to the "reset-game-btn"
-resetGameBtn.addEventListener("click", handleResetGame)
+// ========== Binding Event Handlers ========== //
+const clickEvent = event =>
+  cells.forEach(cell => cell[event]("click", handleClickCell))
 
-// Event listener to bind "handleResetScore" event handler function to the "reset-score-btn"
-resetScoreBtn.addEventListener("click", handleResetScore)
+clickCells("addEventListener")
+
+const clickButtonEvent = button =>
+  [button].addEventListener("click", handleResetButtons)
+clickButtonEvent(resetGameBtn)
+clickButtonEvent(resetScoreBtn)
