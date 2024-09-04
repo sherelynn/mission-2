@@ -76,7 +76,7 @@ const setWinningGameState = symbol => {
     : (xCount++, (xCountWins.textContent = xCount))
 
   // Call function to disable cell clicks
-  clickCells("removeEventListener")
+  clickEvent("removeEventListener")
 }
 
 // ===== Update Game State if Stalemate ===== //
@@ -182,7 +182,7 @@ const makeComputerMove = () => {
     // Make a random move
     const availableCells = cells.filter(cell => cell.textContent === "")
     if (availableCells.length > 0) {
-      randomMoveIndex = Number(
+      let randomMoveIndex = Number(
         availableCells[
           Math.floor(Math.random() * availableCells.length)
         ].getAttribute("data-index")
@@ -257,7 +257,7 @@ const handleResetButtons = event => {
   resetGameCondition()
 
   // Activate "handleClickCell" event again
-  clickCells("activate")
+  clickEvent("addEventListener")
 
   if (button === "reset-score-btn") {
     // Reset counters for number of wins
@@ -278,9 +278,10 @@ const handleResetButtons = event => {
 const clickEvent = event =>
   cells.forEach(cell => cell[event]("click", handleClickCell))
 
-clickCells("addEventListener")
+clickEvent("addEventListener")
 
-const clickButtonEvent = button =>
-  [button].addEventListener("click", handleResetButtons)
+const clickButtonEvent = button => {
+  button.addEventListener("click", handleResetButtons)
+}
 clickButtonEvent(resetGameBtn)
 clickButtonEvent(resetScoreBtn)
