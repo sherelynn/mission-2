@@ -1,3 +1,4 @@
+"use-strict"
 // ========== HTML Element References ========== //
 const cells = Array.from(document.getElementsByTagName("td")) // Array of all table cells
 const subtitle = document.getElementById("subtitle") // Dynamic subtitle
@@ -123,10 +124,12 @@ const checkMove = (index, symbol) => {
   if (!gameIsOver) {
     // Switch to next player
     const noughtsTurn = togglePlayer()
+
     // Computer's turn
     if (!noughtsTurn) {
       setTimeout(makeComputerMove, 500)
     }
+
     // Condition: All cells are filled and winning condition not met
     if (clicks === 9) {
       // Call function to update the game state
@@ -206,7 +209,6 @@ const handleClickCell = event => {
     // Variable for user's symbol
     let symbol = "O"
     let index = Number(cell.getAttribute("data-index"))
-    cell.textContent = symbol
 
     // Check user's move
     checkMove(index, symbol)
